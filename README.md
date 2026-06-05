@@ -1,8 +1,19 @@
-# ❖ rMonitor — Rust System Monitor ❖
+# rMonitor — Rust System Monitor
 
 `rMonitor` is a lightweight, responsive, and high-performance terminal system monitor (TUI) custom-tailored for Windows, built using **Rust** and the **Ratatui** framework.
 
 ![rMonitor Screenshot](rmon_icon_256.png)
+
+## 🆕 What's New in v2.0 (Unified Release)
+This release aligns the visual styling, interfaces, and experience of `rMonitor` and `rSaver` under a unified dashboard design system:
+* **Standardized Borders**: Separate bordered blocks for each UI section, removing the outer screen-wide border.
+* **Unified Title Bar**: Standardized header layout displaying `[App Name] │ [user@host] │ [OS & Build]`.
+* **Standard Text Selection**: Restored terminal text selection by disabling raw crossterm mouse capture.
+* **Console Tab Titles**: Sets the active tab title to `"rMon"` on startup and restores it upon exit.
+* **Clean Status Bar**: Bottom status bar has a matching accent-colored `" Status "` border title and clean, bold-colored feedback messages (status light dot removed).
+* **Interactive Status Feedback**: Status bar dynamically reports focus transitions and descriptions when navigating using `Tab`.
+
+---
 
 ## 🚀 Features
 *   **Compact CPU Metrics:** Displays global CPU usage, logical core counts, and CPU architecture in a compact core grid supporting up to 64+ cores.
@@ -12,7 +23,7 @@
 *   **Connected Network Sorting:** Checks active network adapters (`Ethernet`, `Wi-Fi`, `Bluetooth`) and displays their connection status (`Plugged` vs `Disconnected`), bubbling active connections to the top of the interface list.
 *   **Unified Process Table:** Lists active process PIDs, Names, CPU%, RAM (MB), Storage (Disk I/O), GPU%, and Network speed (bytes/s).
 *   **Context-Sensitive Sorting:** Dynamically sorts the process list by the resource matching the currently focused panel.
-*   **Neofetch-style Title Banner:** Displays username, hostname, OS version, kernel release, and uptime in a compact layout.
+*   **Neofetch-style Title Banner:** Displays username, hostname, OS version, and kernel build in a compact layout.
 *   **Automatic Resizing:** Auto-resizes the terminal window to a compact 110x38 characters layout upon startup.
 *   **Diagnostics & JSON Snapshots:** Built-in subcommands for system health audits (`--doctor`) and structured snapshots (`--json`).
 

@@ -4,7 +4,7 @@ use std::{
 };
 
 use crossterm::{
-	event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind},
+	event::{self, Event, KeyCode, KeyEventKind},
 	execute,
 	terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -199,6 +199,38 @@ fn format_uptime(secs: u64) -> String {
 	} else {
 		format!("{}m", minutes)
 	}
+}
+
+fn query_os_version() -> String {
+	use winreg::RegKey;
+	use winreg::enums::HKEY_LOCAL_MACHINE;
+
+	let Ok(key) = RegKey::predef(HKEY_LOCAL_MACHINE)
+		.open_subkey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion")
+	else {
+		return "Windows".to_string();
+	};
+
+	let mut product_name = key.get_value::<String, _>("ProductName").unwrap_or_else(|_| "Windows".to_string());
+	let current_build = key.get_value::<String, _>("CurrentBuild").unwrap_or_default();
+	let display_version = key.get_value::<String, _>("DisplayVersion").unwrap_or_default();
+
+	if product_name.starts_with("Windows 10") {
+		if let Ok(build) = current_build.parse::<u32>() {
+			if build >= 22000 {
+				product_name = product_name.replace("Windows 10", "Windows 11");
+			}
+		}
+	}
+
+	let mut parts = vec![product_name];
+	if !display_version.is_empty() {
+		parts.push(display_version);
+	}
+	if !current_build.is_empty() {
+		parts.push(format!("(Build {})", current_build));
+	}
+	parts.join(" ")
 }
 
 #[derive(PartialEq, Clone, Copy)]
@@ -512,7 +544,7 @@ fn main() -> Result<(), io::Error> {
 		log_message("ERROR", &format!("PANIC: {} ({})", msg, location));
 		let _ = disable_raw_mode();
 		let mut stdout = io::stdout();
-		let _ = execute!(stdout, LeaveAlternateScreen, DisableMouseCapture);
+		let _ = execute!(stdout, LeaveAlternateScreen);
 		eprintln!("rMonitor crashed! Panic logged. Error: {} at {}", msg, location);
 	}));
 
@@ -532,10 +564,12 @@ fn main() -> Result<(), io::Error> {
 
 	log_message("INFO", "rMonitor starting up...");
 
+	let _title_guard = ConsoleTitleGuard::new("rMon");
+
 	enable_raw_mode()?;
 	let mut stdout = io::stdout();
 	let _ = execute!(stdout, crossterm::terminal::SetSize(110, 38));
-	execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
+	execute!(stdout, EnterAlternateScreen)?;
 	let backend = CrosstermBackend::new(stdout);
 	let mut terminal = Terminal::new(backend)?;
 
@@ -676,8 +710,7 @@ fn main() -> Result<(), io::Error> {
 	disable_raw_mode()?;
 	execute!(
 		terminal.backend_mut(),
-		LeaveAlternateScreen,
-		DisableMouseCapture
+		LeaveAlternateScreen
 	)?;
 	terminal.show_cursor()?;
 
@@ -697,41 +730,30 @@ fn draw_ui(f: &mut ratatui::Frame, app: &mut App) {
 			Constraint::Length(3), // Title Banner
 			Constraint::Length(6), // CPU, Memory, Disk, GPU, Network stats (Top cards)
 			Constraint::Min(10),   // Full-width context Table
-			Constraint::Length(1), // Footer status bar
+			Constraint::Length(3), // Footer status bar
 		])
 		.split(size);
 
 	// 1. Draw Title with OS details (neofetch/fastfetch style)
-	let os_name = System::long_os_version().unwrap_or_else(|| System::name().unwrap_or_else(|| "Windows".to_string()));
-	let host_name = System::host_name().unwrap_or_else(|| "localhost".to_string());
-	let uptime = format_uptime(System::uptime());
+	let host_name = std::env::var("COMPUTERNAME").unwrap_or_else(|_| "localhost".to_string());
 	let username = std::env::var("USERNAME").unwrap_or_else(|_| std::env::var("USER").unwrap_or_else(|_| "user".to_string()));
-	let short_os = os_name
-		.replace("Microsoft Windows ", "Win")
-		.replace("Windows ", "Win")
-		.replace("Pro", "")
-		.replace("Home", "")
-		.replace("Enterprise", "")
-		.trim()
-		.to_string();
-	let kernel = System::kernel_version().unwrap_or_else(|| "unknown".to_string());
-	let theme_mode = if is_dark_mode() { "Dark" } else { "Light" };
-	let accent_hex = get_win_accent_color();
 
 	let title_block = Block::default()
 		.borders(Borders::ALL)
-		.border_style(Style::default().fg(theme.border));
+		.border_style(Style::default().fg(theme.border))
+		.title(Span::styled(
+			" Rust System Monitor ",
+			Style::default().fg(theme.accent).add_modifier(Modifier::BOLD),
+		));
 		
+	let os_str = query_os_version();
+
 	let title_p = Paragraph::new(Line::from(vec![
-		Span::styled(" ❖  rMonitor  ❖ ", Style::default().fg(Color::Rgb(30, 30, 46)).bg(theme.accent).add_modifier(Modifier::BOLD)),
+		Span::styled(" rMonitor ", Style::default().fg(theme.accent).add_modifier(Modifier::BOLD)),
 		Span::styled(" │ ", Style::default().fg(theme.border)),
 		Span::styled(format!("{}@{}", username, host_name), Style::default().fg(Color::Rgb(255, 215, 0)).add_modifier(Modifier::BOLD)),
 		Span::styled(" │ ", Style::default().fg(theme.border)),
-		Span::styled(format!("OS: {} ({})", short_os, kernel), Style::default().fg(theme.text_main)),
-		Span::styled(" │ ", Style::default().fg(theme.border)),
-		Span::styled(format!("Theme: {} ({})", theme_mode, accent_hex), Style::default().fg(theme.text_main)),
-		Span::styled(" │ ", Style::default().fg(theme.border)),
-		Span::styled(format!("Uptime: {}", uptime), Style::default().fg(Color::Rgb(80, 250, 123)).add_modifier(Modifier::BOLD)),
+		Span::styled(os_str, Style::default().fg(theme.text_main)),
 	]))
 	.block(title_block);
 	f.render_widget(title_p, chunks[0]);
@@ -956,11 +978,33 @@ fn draw_ui(f: &mut ratatui::Frame, app: &mut App) {
 	draw_context_table(f, chunks[2], app);
 
 	// 4. Footer Status Bar
+	let footer_block = Block::default()
+		.borders(Borders::ALL)
+		.border_style(Style::default().fg(theme.border))
+		.title(Span::styled(
+			" Status ",
+			Style::default().fg(theme.accent).add_modifier(Modifier::BOLD),
+		));
+
+	let footer_inner = footer_block.inner(chunks[3]);
+	f.render_widget(footer_block, chunks[3]);
+
+	let (text_color, status_text) = if app.status_msg == "Press Tab to cycle panel focus" {
+		(theme.text_dim, "Ready. Press Tab to cycle focus.".to_string())
+	} else {
+		let lower = app.status_msg.to_lowercase();
+		let color = if lower.contains("failed") || lower.contains("error") {
+			Color::Rgb(255, 85, 85)
+		} else {
+			theme.accent
+		};
+		(color, app.status_msg.clone())
+	};
+
 	let footer_p = Paragraph::new(Line::from(vec![
-		Span::styled(" STATUS: ", Style::default().fg(Color::Rgb(30, 30, 46)).bg(Color::Rgb(80, 250, 123)).add_modifier(Modifier::BOLD)),
-		Span::styled(format!(" {} ", app.status_msg), Style::default().fg(theme.text_main)),
+		Span::styled(status_text, Style::default().fg(text_color).add_modifier(Modifier::BOLD)),
 	]));
-	f.render_widget(footer_p, chunks[3]);
+	f.render_widget(footer_p, footer_inner);
 
 	// Draw Modal/Popup for Process Details
 	if let Some(details) = &app.selected_process_details {
@@ -1529,7 +1573,7 @@ fn print_json_snapshot() {
 	let gpu_names = get_gpu_names();
 	
 	let os_name = System::long_os_version().unwrap_or_else(|| System::name().unwrap_or_else(|| "Windows".to_string()));
-	let host_name = System::host_name().unwrap_or_else(|| "localhost".to_string());
+	let host_name = std::env::var("COMPUTERNAME").unwrap_or_else(|_| "localhost".to_string());
 	let username = std::env::var("USERNAME").unwrap_or_else(|_| std::env::var("USER").unwrap_or_else(|_| "user".to_string()));
 	let uptime = System::uptime();
 	
@@ -1610,7 +1654,7 @@ fn run_doctor() {
 	
 	let os_name = System::long_os_version().unwrap_or_else(|| System::name().unwrap_or_else(|| "Windows".to_string()));
 	let kernel = System::kernel_version().unwrap_or_else(|| "unknown".to_string());
-	let host_name = System::host_name().unwrap_or_else(|| "localhost".to_string());
+	let host_name = std::env::var("COMPUTERNAME").unwrap_or_else(|_| "localhost".to_string());
 	println!("Operating System:  {}", os_name);
 	println!("Kernel Version:    {}", kernel);
 	println!("Hostname:          {}", host_name);
@@ -1733,4 +1777,45 @@ fn run_install() {
 	println!("Installation complete!");
 	println!("You can now launch 'rMonitor' from the Start Menu");
 	println!("or by pressing Win+R and entering 'rmon'!");
+}
+
+#[link(name = "kernel32")]
+unsafe extern "system" {
+	fn GetConsoleTitleW(lp_console_title: *mut u16, n_size: u32) -> u32;
+	fn SetConsoleTitleW(lp_console_title: *const u16) -> i32;
+}
+
+struct ConsoleTitleGuard {
+	original_title: Option<Vec<u16>>,
+}
+
+impl ConsoleTitleGuard {
+	fn new(new_title: &str) -> Self {
+		let mut buf = [0u16; 512];
+		let len = unsafe { GetConsoleTitleW(buf.as_mut_ptr(), buf.len() as u32) };
+		let original_title = if len > 0 {
+			Some(buf[..len as usize].to_vec())
+		} else {
+			None
+		};
+
+		let title_w: Vec<u16> = new_title.encode_utf16().chain(std::iter::once(0)).collect();
+		unsafe {
+			SetConsoleTitleW(title_w.as_ptr());
+		}
+
+		ConsoleTitleGuard { original_title }
+	}
+}
+
+impl Drop for ConsoleTitleGuard {
+	fn drop(&mut self) {
+		if let Some(ref title) = self.original_title {
+			let mut title_null = title.clone();
+			title_null.push(0);
+			unsafe {
+				SetConsoleTitleW(title_null.as_ptr());
+			}
+		}
+	}
 }

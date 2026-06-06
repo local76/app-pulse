@@ -305,6 +305,7 @@ struct App {
     show_markdown: Option<String>,
     markdown_lines: Vec<ratatui::text::Line<'static>>,
     markdown_scroll: usize,
+    show_help: bool,
 }
 
 impl App {
@@ -359,6 +360,7 @@ impl App {
             show_markdown: None,
             markdown_lines: Vec::new(),
             markdown_scroll: 0,
+            show_help: false,
         };
         app.update_metrics();
         app
@@ -740,6 +742,47 @@ fn main() -> Result<(), io::Error> {
                                 }
                                 _ => {}
                             }
+                        } else if app.show_help {
+                            let theme = get_theme(is_dark_mode());
+                            match key.code {
+                                KeyCode::Char('q')
+                                | KeyCode::Char('Q')
+                                | KeyCode::Esc
+                                | KeyCode::Char('h')
+                                | KeyCode::Char('H') => {
+                                    app.show_help = false;
+                                    app.set_status("Help overlay closed.".to_string());
+                                }
+                                KeyCode::F(1) => {
+                                    app.show_help = false;
+                                    app.open_embedded_markdown("README.md", README_CONTENT, &theme);
+                                }
+                                KeyCode::F(2) => {
+                                    app.show_help = false;
+                                    app.open_embedded_markdown("SUPPORT.md", SUPPORT_CONTENT, &theme);
+                                }
+                                KeyCode::F(3) => {
+                                    app.show_help = false;
+                                    app.open_embedded_markdown("LICENSE.md", LICENSE_CONTENT, &theme);
+                                }
+                                KeyCode::F(4) => {
+                                    app.show_help = false;
+                                    app.open_embedded_markdown("COPYRIGHT.md", COPYRIGHT_CONTENT, &theme);
+                                }
+                                KeyCode::F(5) => {
+                                    app.show_help = false;
+                                    app.open_embedded_markdown("PRIVACY.md", PRIVACY_CONTENT, &theme);
+                                }
+                                KeyCode::F(6) => {
+                                    app.show_help = false;
+                                    app.open_embedded_markdown("SECURITY.md", SECURITY_CONTENT, &theme);
+                                }
+                                KeyCode::F(7) => {
+                                    app.show_help = false;
+                                    app.open_embedded_markdown("CONTRIBUTING.md", CONTRIBUTING_CONTENT, &theme);
+                                }
+                                _ => {}
+                            }
                         } else if app.show_markdown.is_some() {
                             let theme = get_theme(is_dark_mode());
                             match key.code {
@@ -852,7 +895,8 @@ fn main() -> Result<(), io::Error> {
                                     app.open_embedded_markdown("CONTRIBUTING.md", CONTRIBUTING_CONTENT, &theme);
                                 }
                                 KeyCode::Char('h') | KeyCode::Char('H') => {
-                                    app.open_embedded_markdown("README.md", README_CONTENT, &theme);
+                                    app.show_help = true;
+                                    app.set_status("Help overlay active. Press ESC/q to close.".to_string());
                                 }
                                 KeyCode::Up | KeyCode::Char('k') => {
                                     let current = app.process_state.selected().unwrap_or(0);
@@ -1575,6 +1619,115 @@ fn draw_ui(f: &mut ratatui::Frame, app: &mut App) {
             app.selection_end = None;
             app.selection_pending_copy = false;
         }
+    }
+
+    // 4. Help Overlay Modal
+    if app.show_help {
+        let area = centered_rect(65, 75, size);
+        let popup_block = Block::default()
+            .title(" Keyboard Shortcuts & TUI Commands ")
+            .title_style(
+                Style::default()
+                    .fg(theme.accent)
+                    .add_modifier(Modifier::BOLD),
+            )
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(theme.accent));
+
+        let key_col_width = 18;
+        let border_padding = 2;
+        let total_inner_width = area.width.saturating_sub(border_padding);
+        let max_desc_width = (total_inner_width as usize)
+            .saturating_sub(key_col_width)
+            .saturating_sub(2); // for ": "
+
+        let mut help_text = Vec::new();
+        help_text.push(Line::from(""));
+
+        help_text.extend(format_help_row(
+            "Tab",
+            "Cycle active panel focus",
+            max_desc_width,
+            &theme,
+        ));
+        help_text.extend(format_help_row(
+            "Enter",
+            "View detailed metrics of the selected process",
+            max_desc_width,
+            &theme,
+        ));
+        help_text.extend(format_help_row(
+            "F9 / K / Del",
+            "Terminate (kill) the selected process",
+            max_desc_width,
+            &theme,
+        ));
+        help_text.extend(format_help_row(
+            "Esc / q",
+            "Close dialogs / Help Overlay, or Quit application",
+            max_desc_width,
+            &theme,
+        ));
+        help_text.extend(format_help_row(
+            "h",
+            "Toggle this help shortcut overlay modal",
+            max_desc_width,
+            &theme,
+        ));
+        help_text.extend(format_help_row(
+            "Left Click/Drag",
+            "Highlight text to copy to Windows Clipboard",
+            max_desc_width,
+            &theme,
+        ));
+
+        help_text.push(Line::from(""));
+        help_text.extend(format_help_row(
+            "F1",
+            "View README.md document",
+            max_desc_width,
+            &theme,
+        ));
+        help_text.extend(format_help_row(
+            "F2",
+            "View SUPPORT.md document",
+            max_desc_width,
+            &theme,
+        ));
+        help_text.extend(format_help_row(
+            "F3",
+            "View LICENSE.md document",
+            max_desc_width,
+            &theme,
+        ));
+        help_text.extend(format_help_row(
+            "F4",
+            "View COPYRIGHT.md document",
+            max_desc_width,
+            &theme,
+        ));
+        help_text.extend(format_help_row(
+            "F5",
+            "View PRIVACY.md document",
+            max_desc_width,
+            &theme,
+        ));
+        help_text.extend(format_help_row(
+            "F6",
+            "View SECURITY.md document",
+            max_desc_width,
+            &theme,
+        ));
+        help_text.extend(format_help_row(
+            "F7",
+            "View CONTRIBUTING.md document",
+            max_desc_width,
+            &theme,
+        ));
+
+        f.render_widget(ratatui::widgets::Clear, area);
+        let paragraph = Paragraph::new(help_text).block(popup_block);
+        f.render_widget(paragraph, area);
     }
 
     // 5. Scrollable Markdown Document Viewer Modal
@@ -2787,3 +2940,78 @@ fn parse_markdown_to_lines(content: &str, theme: &ThemeColors) -> Vec<ratatui::t
     flush_paragraph(&mut current_paragraph, &mut lines);
     lines
 }
+
+fn wrap_text(text: &str, max_width: usize) -> Vec<String> {
+    if max_width == 0 {
+        return vec![text.to_string()];
+    }
+    let mut lines = Vec::new();
+    let mut current_line = String::new();
+
+    for word in text.split_whitespace() {
+        if current_line.is_empty() {
+            current_line.push_str(word);
+        } else if current_line.len() + 1 + word.len() <= max_width {
+            current_line.push(' ');
+            current_line.push_str(word);
+        } else {
+            lines.push(current_line);
+            current_line = word.to_string();
+        }
+    }
+    if !current_line.is_empty() {
+        lines.push(current_line);
+    }
+    if lines.is_empty() {
+        lines.push(String::new());
+    }
+    lines
+}
+
+fn format_help_row(
+    key: &str,
+    description: &str,
+    max_desc_width: usize,
+    theme: &ThemeColors,
+) -> Vec<ratatui::text::Line<'static>> {
+    let wrapped = wrap_text(description, max_desc_width);
+    let mut lines = Vec::new();
+
+    let key_col_width = 18;
+    let key_str = format!("  {:<15} ", key);
+
+    if wrapped.is_empty() {
+        lines.push(ratatui::text::Line::from(vec![
+            ratatui::text::Span::styled(
+                key_str,
+                ratatui::style::Style::default()
+                    .fg(theme.accent)
+                    .add_modifier(ratatui::style::Modifier::BOLD),
+            ),
+            ratatui::text::Span::styled(": ", ratatui::style::Style::default().fg(theme.text_main)),
+        ]));
+    } else {
+        for (i, chunk) in wrapped.into_iter().enumerate() {
+            if i == 0 {
+                lines.push(ratatui::text::Line::from(vec![
+                    ratatui::text::Span::styled(
+                        key_str.clone(),
+                        ratatui::style::Style::default()
+                            .fg(theme.accent)
+                            .add_modifier(ratatui::style::Modifier::BOLD),
+                    ),
+                    ratatui::text::Span::styled(": ", ratatui::style::Style::default().fg(theme.text_main)),
+                    ratatui::text::Span::styled(chunk, ratatui::style::Style::default().fg(theme.text_main)),
+                ]));
+            } else {
+                let padding = " ".repeat(key_col_width + 2);
+                lines.push(ratatui::text::Line::from(vec![
+                    ratatui::text::Span::styled(padding, ratatui::style::Style::default().fg(theme.text_dim)),
+                    ratatui::text::Span::styled(chunk, ratatui::style::Style::default().fg(theme.text_main)),
+                ]));
+            }
+        }
+    }
+    lines
+}
+

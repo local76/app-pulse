@@ -10,7 +10,9 @@ fn main() {
     if png_path.exists() {
         let mut png_file = File::open(png_path).expect("failed to open rmon_icon_256.png");
         let mut png_data = Vec::new();
-        png_file.read_to_end(&mut png_data).expect("failed to read png");
+        png_file
+            .read_to_end(&mut png_data)
+            .expect("failed to read png");
 
         let mut ico_file = File::create(ico_path).expect("failed to create rtop.ico");
 

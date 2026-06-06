@@ -1,24 +1,8 @@
-```text
-         __  ___            _ __            
-   _____/  |/  /___  ____  (_) /_____  _____
-  / ___/ /|_/ / __ \/ __ \/ / __/ __ \/ ___/
- / /  / /  / / /_/ / / / / / /_/ /_/ / /    
-/_/  /_/  /_/\____/_/ /_/_/\__/\____/_/     
-```
-
-```text
-  _____                       _             
- |_   _|___ _ _ ___ _ ___ _ _| |_ _ _____ ___
-   | | | . | | |  _| | . | | | . | | |     |  _|
-   |_| |___|___|_| |_|___|_|_|___|_|_|_|_|_|___|
-                                  D Y N A M I C S
-```
-
 # Contributing to `rMonitor`
 
 We are thrilled that you want to help improve `rMonitor`! Contributions from the community are what make open-source projects so special. Please follow these guidelines to make sure your contribution matches the style and quality standards of the project.
 
-## 🛠️ Developer Environment Setup
+## Developer Environment Setup
 To build and test `rMonitor` locally:
 1. Make sure you have the standard Rust toolchain installed.
 2. Clone this repository.
@@ -39,7 +23,7 @@ To build and test `rMonitor` locally:
     .\build.bat
     ```
 
-## 📜 Pull Request Process
+## Pull Request Process
 1. Fork the repository and create a new feature branch:
     ```bash
     git checkout -b feature/my-new-feature
@@ -49,7 +33,7 @@ To build and test `rMonitor` locally:
 4. Document any new features in the [README.md](README.md) or corresponding help manuals.
 5. Open a Pull Request detailing the purpose of your change and any design decisions you made.
 
-## 🎨 TUI Design Principles
+## TUI Design Principles
 If you are modifying the user interface, please keep in mind:
 *   **Aesthetics:** We use high-contrast HSL/RGB tailored color themes. Do not use plain primaries (e.g., pure blue, pure red).
 *   **Balance:** Maintain 4-line layouts in the top statistics panels to keep the dashboard balanced.

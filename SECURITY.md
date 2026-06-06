@@ -1,19 +1,3 @@
-```text
-         __  ___            _ __            
-   _____/  |/  /___  ____  (_) /_____  _____
-  / ___/ /|_/ / __ \/ __ \/ / __/ __ \/ ___/
- / /  / /  / / /_/ / / / / / /_/ /_/ / /    
-/_/  /_/  /_/\____/_/ /_/_/\__/\____/_/     
-```
-
-```text
-  _____                       _             
- |_   _|___ _ _ ___ _ ___ _ _| |_ _ _____ ___
-   | | | . | | |  _| | . | | | . | | |     |  _|
-   |_| |___|___|_| |_|___|_|_|___|_|_|_|_|_|___|
-                                  D Y N A M I C S
-```
-
 # Security Policy
 
 We take the security of `rMonitor` seriously. If you discover a vulnerability, please report it following this policy.

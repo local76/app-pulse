@@ -8,7 +8,7 @@ ratatui = "0.29"
 crossterm = "0.28"
 sysinfo = "0.30"
 serde_json = "1.0.150"
-rcommon = { git = "https://github.com/local76/rCommon.git", branch = "main", features = ["interface-tui", "lifecycle-foreground", "lifecycle-background", "platform-native", "role-application"] }
+rcommon = { git = "https://github.com/local76/rCommon.git", branch = "main", features = ["interface-tui", "lifecycle-foreground", "lifecycle-background", "platform-native", "role-application", "scenes"] }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.56.0"

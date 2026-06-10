@@ -12,7 +12,7 @@ pub fn print() {
     let gpu_names = gpu_names::get_gpu_names_sorted();
 
     let os_name = sysinfo::System::long_os_version()
-        .or_else(|| sysinfo::System::name())
+        .or_else(sysinfo::System::name)
         .unwrap_or_else(|| "Windows".to_string());
     let host_name = library::lifecycle::foreground::identity::hostname();
     let username = library::lifecycle::foreground::identity::username();

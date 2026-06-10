@@ -129,7 +129,7 @@ fn render_context_table(f: &mut Frame, area: Rect, app: &mut App) {
             let num_cpus = app.sys.cpus().len();
             let inner = area.width as usize;
             let cols = (inner / 10).max(1);
-            let rows = (num_cpus + cols - 1) / cols;
+            let rows = num_cpus.div_ceil(cols);
             (rows as u16 + 2).clamp(4, 15)
         }
         FocusedSection::Memory => 11,

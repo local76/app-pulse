@@ -2,7 +2,6 @@
 //! `win32::query_power_status()` etc. while delegating to library.
 
 #[allow(unused_imports)]
-#[allow(unused_imports)]
 pub use library::clipboard::copy_text_to_clipboard;
 #[allow(unused_imports)]
 pub use library::lifecycle::foreground::identity::{hostname, os_str, user_host, username};
@@ -13,7 +12,6 @@ pub use library::lifecycle::foreground::window::{
 };
 #[allow(unused_imports)]
 pub use library::platform::native::monitors::get_all_monitors;
-#[allow(unused_imports)]
 #[allow(unused_imports)]
 pub use library::platform::native::sys_info::{
     query_bios_info, query_dark_mode as is_dark_mode, query_disk_drives, query_gpu_names,

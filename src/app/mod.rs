@@ -330,14 +330,14 @@ impl App {
             FocusedSection::Cpu => self
                 .processes
                 .sort_by(|a, b| b.cpu.total_cmp(&a.cpu)),
-            FocusedSection::Memory => self.processes.sort_by(|a, b| b.mem.cmp(&a.mem)),
+            FocusedSection::Memory => self.processes.sort_by_key(|b| std::cmp::Reverse(b.mem)),
             FocusedSection::Disk => self
                 .processes
-                .sort_by(|a, b| (b.disk_read + b.disk_write).cmp(&(a.disk_read + a.disk_write))),
+                .sort_by_key(|b| std::cmp::Reverse(b.disk_read + b.disk_write)),
             FocusedSection::Gpu => self
                 .processes
                 .sort_by(|a, b| b.gpu.total_cmp(&a.gpu)),
-            FocusedSection::Network => self.processes.sort_by(|a, b| b.net.cmp(&a.net)),
+            FocusedSection::Network => self.processes.sort_by_key(|b| std::cmp::Reverse(b.net)),
         }
 
         if !self.processes.is_empty() {

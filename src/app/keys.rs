@@ -124,22 +124,20 @@ fn handle_key_main(app: &mut App, code: KeyCode) {
     match code {
         KeyCode::Char('q') | KeyCode::Esc => app.should_quit = true,
         KeyCode::Enter => {
-            if let Some(idx) = app.process_state.selected() {
-                if idx < app.processes.len() {
+            if let Some(idx) = app.process_state.selected()
+                && idx < app.processes.len() {
                     let item = &app.processes[idx];
                     app.show_process_details(item.pid);
                 }
-            }
         }
         KeyCode::F(9) | KeyCode::Char('K') | KeyCode::Delete => {
-            if let Some(idx) = app.process_state.selected() {
-                if idx < app.processes.len() {
+            if let Some(idx) = app.process_state.selected()
+                && idx < app.processes.len() {
                     let item = &app.processes[idx];
                     app.kill_confirm_pid = Some(item.pid);
                     app.kill_confirm_name = Some(item.name.clone());
                     app.set_status(format!("Confirm kill: {} (PID: {})? [y/n]", item.name, item.pid));
                 }
-            }
         }
         KeyCode::Tab => {
             app.focus = match app.focus {

@@ -28,7 +28,7 @@ pub fn run_doctor() {
     sys.refresh_all();
 
     let os_name = sysinfo::System::long_os_version()
-        .or_else(|| sysinfo::System::name())
+        .or_else(sysinfo::System::name)
         .unwrap_or_else(|| "Windows".to_string());
     let kernel = sysinfo::System::kernel_version().unwrap_or_else(|| "unknown".to_string());
     let host_name = library::lifecycle::foreground::identity::hostname();

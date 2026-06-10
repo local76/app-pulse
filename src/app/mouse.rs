@@ -50,13 +50,11 @@ pub fn handle_mouse(
             if app.drag.is_active() {
                 if let (Some(start_cursor), Some(start_window)) =
                     (app.drag.start_cursor, app.drag.start_window)
-                {
-                    if let Some(curr) = query_cursor_pos() {
+                    && let Some(curr) = query_cursor_pos() {
                         let dx = curr.0 - start_cursor.0;
                         let dy = curr.1 - start_cursor.1;
                         set_window_pos(start_window.0 + dx, start_window.1 + dy);
                     }
-                }
             } else if app.selection.is_active() {
                 app.selection.on_drag(col, row);
             }

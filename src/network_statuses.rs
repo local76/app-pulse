@@ -7,7 +7,7 @@ pub fn get_network_statuses() -> std::collections::HashMap<String, String> {
     let mut statuses = std::collections::HashMap::new();
     use std::process::Command;
     if let Ok(output) = Command::new("netsh")
-        .args(&["interface", "show", "interface"])
+        .args(["interface", "show", "interface"])
         .output()
     {
         let stdout = String::from_utf8_lossy(&output.stdout);

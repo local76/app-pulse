@@ -1,119 +1,36 @@
-//! `pulse doctor` and `pulse install` CLI subcommands.
+use library::interface::cli::doctor::run_doctor_with_custom;
 
 pub fn run_doctor() {
-    println!("==================================================");
-    println!("           pulse -- System Diagnostics             ");
-    println!("==================================================");
-
-    #[cfg(windows)]
-    {
-        let is_admin = std::process::Command::new("net")
-            .arg("session")
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .status()
-            .map(|s| s.success())
-            .unwrap_or(false);
-        println!(
-            "Privilege Level:   {}",
-            if is_admin {
-                "Administrator (Elevated)"
-            } else {
-                "Standard User"
-            }
-        );
-    }
-
-    let mut sys = sysinfo::System::new_all();
-    sys.refresh_all();
-
-    let os_name = sysinfo::System::long_os_version()
-        .or_else(sysinfo::System::name)
-        .unwrap_or_else(|| "Windows".to_string());
-    let kernel = sysinfo::System::kernel_version().unwrap_or_else(|| "unknown".to_string());
-    let host_name = library::lifecycle::foreground::identity::hostname();
-    println!("Operating System:  {}", os_name);
-    println!("Kernel Version:    {}", kernel);
-    println!("Hostname:          {}", host_name);
-
-    #[cfg(windows)]
-    {
-        use winreg::RegKey;
-        use winreg::enums::*;
-        let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-        let personalize_path =
-            r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
-        let personalize_ok = hkcu
-            .open_subkey_with_flags(personalize_path, KEY_READ)
-            .is_ok();
-        println!(
-            "Registry (Theme):  {}",
-            if personalize_ok {
-                "Accessible (OK)"
-            } else {
-                "Failed to access personalize theme key"
-            }
-        );
-
-        let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
-        let display_class_path =
-            r"SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}";
-        let display_class_ok = hklm
-            .open_subkey_with_flags(display_class_path, KEY_READ)
-            .is_ok();
-        println!(
-            "Registry (GPU):    {}",
-            if display_class_ok {
-                "Accessible (OK)"
-            } else {
-                "Failed to access display adapters class key"
-            }
-        );
-    }
-
-    let gpu_names = crate::gpu_names::get_gpu_names_sorted();
-    println!("Detected GPUs ({}):", gpu_names.len());
-    for (i, name) in gpu_names.iter().enumerate() {
-        println!("  - GPU{}: {}", i + 1, name);
-    }
-
-    let net_statuses = crate::network_statuses::get_network_statuses();
-    println!("Network Statuses (via netsh):");
-    if net_statuses.is_empty() {
-        println!("  No active statuses found or netsh failed.");
-    } else {
-        for (name, status) in &net_statuses {
-            println!("  - {}: {}", name, status);
+    run_doctor_with_custom(|_| {
+        let gpu_names = crate::gpu_names::get_gpu_names_sorted();
+        println!("\nDetected GPUs ({}):", gpu_names.len());
+        for (i, name) in gpu_names.iter().enumerate() {
+            println!("  - GPU{}: {}", i + 1, name);
         }
-    }
 
-    if let Ok(app_data) = std::env::var("APPDATA") {
-        let log_file = std::path::Path::new(&app_data)
-            .join("local76")
-            .join("pulse")
-            .join("log.txt");
-        println!("Log File Path:     {}", log_file.to_string_lossy());
-        println!(
-            "Log Status:        {}",
-            if log_file.exists() {
-                "Active"
-            } else {
-                "Not created yet"
-            }
-        );
-    }
-
-    let clip_ok = library::lifecycle::background::clipboard::copy_text_to_clipboard("pulse Diagnostic Test").is_ok();
-    println!(
-        "Windows Clipboard: {}",
-        if clip_ok {
-            "Accessible (OK)"
+        let net_statuses = crate::network_statuses::get_network_statuses();
+        println!("\nNetwork Statuses (via netsh):");
+        if net_statuses.is_empty() {
+            println!("  No active statuses found or netsh failed.");
         } else {
-            "Failed to access clipboard"
+            for (name, status) in &net_statuses {
+                println!("  - {}: {}", name, status);
+            }
         }
-    );
-    println!("==================================================");
-    println!("Diagnostics complete!");
+
+        println!("\nChecking Log File...");
+        if let Some(log_file) = crate::logger::get_appdata_log_path() {
+            println!("  Log File Path:     {}", log_file.to_string_lossy());
+            println!(
+                "  Log Status:        {}",
+                if log_file.exists() {
+                    "Active"
+                } else {
+                    "Not created yet"
+                }
+            );
+        }
+    });
 }
 
 pub fn run_install() {

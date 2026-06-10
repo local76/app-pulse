@@ -13,7 +13,7 @@ use library::lifecycle::foreground::WindowDrag;
 use library::lifecycle::foreground::power_sync::PowerThrottle;
 
 use crate::config::AppConfig;
-use crate::spring::Spring;
+use library::ui::spring::Spring;
 
 pub mod keys;
 pub mod mouse;

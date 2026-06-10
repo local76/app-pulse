@@ -1,4 +1,4 @@
-//! Application state, process data, and process-detail snapshot for pulse.
+﻿//! Application state, process data, and process-detail snapshot for pulse.
 
 use std::time::Instant;
 
@@ -7,10 +7,11 @@ use ratatui::text::Line;
 use ratatui::widgets::TableState;
 use sysinfo::{Disks, Networks, System};
 
-use library::interface::app::StatusBar;
-use library::interface::app::widgets::{ButtonRect, MouseSelection};
-use library::lifecycle::foreground::WindowDrag;
-use library::lifecycle::foreground::power_sync::PowerThrottle;
+use library::ui::status_bar::StatusBar;
+use library::ui::title_banner::ButtonRect;
+use library::ui::mouse_selection::MouseSelection;
+use library::apps::window::WindowDrag;
+use library::apps::power_sync::PowerThrottle;
 
 use crate::config::AppConfig;
 use crate::ui::spring::Spring;
@@ -57,7 +58,7 @@ pub struct ProcessDetails {
 /// provide as a per-theme preset).
 #[derive(Debug, Clone, Copy)]
 pub struct AppTheme {
-    pub base: library::interface::app::theme::ThemeColors,
+    pub base: library::ui::theme::ThemeColors,
     pub highlight_bg: Color,
 }
 
@@ -67,7 +68,7 @@ impl AppTheme {
     /// text usually means a light background, so the highlight choice flips
     /// accordingly. Used by the `current_theme` migration in 4.3.
     pub fn from_base(
-        base: library::interface::app::theme::ThemeColors,
+        base: library::ui::theme::ThemeColors,
         dark_highlight: Color,
         light_highlight: Color,
     ) -> Self {
@@ -85,7 +86,7 @@ impl AppTheme {
 }
 
 impl std::ops::Deref for AppTheme {
-    type Target = library::interface::app::theme::ThemeColors;
+    type Target = library::ui::theme::ThemeColors;
     fn deref(&self) -> &Self::Target {
         &self.base
     }
@@ -130,7 +131,7 @@ pub struct App {
     pub username: String,
     pub host_name: String,
     pub os_str: String,
-    pub ebpf: library::EbpfTracker,
+    pub ebpf: library::toolkit::ebpf::EbpfTracker,
 }
 
 impl App {
@@ -180,11 +181,11 @@ impl App {
             quit_btn: None,
             help_btn: None,
             drag: WindowDrag::new(),
-            username: library::lifecycle::foreground::identity::username(),
-            host_name: library::lifecycle::foreground::identity::hostname(),
-            os_str: library::lifecycle::foreground::identity::os_str(),
+            username: library::apps::identity::username(),
+            host_name: library::apps::identity::hostname(),
+            os_str: library::apps::identity::os_str(),
             ebpf: {
-                let mut tracker = library::EbpfTracker::new();
+                let mut tracker = library::toolkit::ebpf::EbpfTracker::new();
                 let _ = tracker.start_tracking();
                 tracker
             },

@@ -1,4 +1,4 @@
-//! pulse presentation layer (UI) root module.
+﻿//! pulse presentation layer (UI) root module.
 //!
 //! **Taxonomy Classification**: Interface (TUI / Presentation Layer).
 
@@ -12,10 +12,9 @@ use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout, Rect},
 };
-use library::interface::app::theme::{ThemeColors, get_theme};
-use library::interface::app::widgets::{
-    draw_title_banner, is_too_small, render_too_small_warning,
-};
+use library::ui::theme::{ThemeColors, get_theme};
+use library::ui::title_banner::draw_title_banner;
+use library::ui::layout_guard::{is_too_small, render_too_small_warning};
 
 use crate::app::{App, FocusedSection};
 use crate::metrics_format::accent_color_from_hex;

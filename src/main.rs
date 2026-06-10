@@ -1,4 +1,4 @@
-//! pulse entry point: top-level CLI dispatch + render loop.
+﻿//! pulse entry point: top-level CLI dispatch + render loop.
 
 use std::{
     io,
@@ -39,7 +39,7 @@ fn run_ui() -> io::Result<()> {
 
     let (mut terminal, _guards) = bootstrap_tui(tui_config)?;
 
-        library::show_console_window();
+        library::apps::window::show_console_window();
 
     let mut app = App::new(config);
     let tick_rate = Duration::from_millis(app.config.refresh_rate_ms as u64);

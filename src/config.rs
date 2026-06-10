@@ -1,4 +1,4 @@
-//! pulse application configuration — now backed by library's
+﻿//! pulse application configuration — now backed by library's
 //! `AppConfig<T>`.
 //!
 //! **Taxonomy Classification**: Platform & Architecture (Deployment - Native).
@@ -7,7 +7,7 @@
 
 use std::io;
 
-use library::platform::native::config::{AppConfig as GenericAppConfig, ConfigFields};
+use library::toolkit::config::{AppConfig as GenericAppConfig, ConfigFields};
 
 pub const APP_NAME: &str = "app/pulse";
 pub const CONFIG_FILE: &str = "config.yaml";

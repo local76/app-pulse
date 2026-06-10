@@ -1,9 +1,9 @@
-//! Mouse input event handler for pulse.
+﻿//! Mouse input event handler for pulse.
 //!
 //! **Taxonomy Classification**: Interface (TUI / Presentation Layer).
 
 use crossterm::event::{MouseEventKind, MouseButton};
-use library::lifecycle::foreground::window::{get_window_rect, query_cursor_pos, set_window_pos};
+use library::apps::window::{get_window_rect, query_cursor_pos, set_window_pos};
 use crate::app::App;
 
 pub fn handle_mouse(

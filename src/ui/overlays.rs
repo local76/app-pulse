@@ -155,7 +155,7 @@ pub fn render_help_modal(f: &mut Frame, parent: Rect) {
     let area = centered_rect(65, 75, parent);
     let theme = library::interface::tui::theme::get_theme(true, Color::Rgb(0, 245, 255));
     let popup = Block::default()
-        .title(" Keyboard Shortcuts & TUI Commands ")
+        .title(" Keyboard Shortcuts & App Commands ")
         .title_style(Style::default().fg(theme.accent).add_modifier(Modifier::BOLD))
         .borders(Borders::ALL)
         .border_style(Style::default().fg(theme.accent));

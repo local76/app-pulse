@@ -50,6 +50,7 @@ pub fn run_install() {
     println!("           pulse -- Windows Installation           ");
     println!("==================================================");
 
+    #[cfg(windows)]
     let exe_path = match std::env::current_exe() {
         Ok(p) => p,
         Err(e) => {
@@ -57,6 +58,7 @@ pub fn run_install() {
             return;
         }
     };
+    #[cfg(windows)]
     let exe_dir = exe_path
         .parent()
         .unwrap_or(std::path::Path::new(""))

@@ -11,7 +11,6 @@ const SECONDS_PER_DAY: u64 = 86400;
 // Byte constants
 const BYTES_PER_KB: f64 = 1024.0;
 const BYTES_PER_MB: f64 = 1024.0 * 1024.0;
-const BYTES_PER_GB: f64 = 1024.0 * 1024.0 * 1024.0;
 
 // Fractional block constants for smooth rendering
 const FRACTION_STEPS: usize = 8;

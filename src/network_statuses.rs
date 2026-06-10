@@ -4,7 +4,8 @@
 
 use std::collections::HashMap;
 
-/// Parses netsh interface stdout output into a map of Name -> State
+/// Parses netsh interface stdout output into a map of State -> Name
+#[cfg(any(windows, test))]
 pub fn parse_netsh_output(stdout: &str) -> HashMap<String, String> {
     let mut statuses = HashMap::new();
     for line in stdout.lines() {

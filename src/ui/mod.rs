@@ -12,8 +12,8 @@ use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout, Rect},
 };
-use library::interface::tui::theme::{ThemeColors, get_theme};
-use library::interface::tui::widgets::{
+use library::interface::app::theme::{ThemeColors, get_theme};
+use library::interface::app::widgets::{
     draw_title_banner, is_too_small, render_too_small_warning,
 };
 

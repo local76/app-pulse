@@ -7,8 +7,8 @@ use ratatui::text::Line;
 use ratatui::widgets::TableState;
 use sysinfo::{Disks, Networks, System};
 
-use library::interface::tui::StatusBar;
-use library::interface::tui::widgets::{ButtonRect, MouseSelection};
+use library::interface::app::StatusBar;
+use library::interface::app::widgets::{ButtonRect, MouseSelection};
 use library::lifecycle::foreground::WindowDrag;
 use library::lifecycle::foreground::power_sync::PowerThrottle;
 
@@ -57,7 +57,7 @@ pub struct ProcessDetails {
 /// provide as a per-theme preset).
 #[derive(Debug, Clone, Copy)]
 pub struct AppTheme {
-    pub base: library::interface::tui::theme::ThemeColors,
+    pub base: library::interface::app::theme::ThemeColors,
     pub highlight_bg: Color,
 }
 
@@ -67,7 +67,7 @@ impl AppTheme {
     /// text usually means a light background, so the highlight choice flips
     /// accordingly. Used by the `current_theme` migration in 4.3.
     pub fn from_base(
-        base: library::interface::tui::theme::ThemeColors,
+        base: library::interface::app::theme::ThemeColors,
         dark_highlight: Color,
         light_highlight: Color,
     ) -> Self {
@@ -85,7 +85,7 @@ impl AppTheme {
 }
 
 impl std::ops::Deref for AppTheme {
-    type Target = library::interface::tui::theme::ThemeColors;
+    type Target = library::interface::app::theme::ThemeColors;
     fn deref(&self) -> &Self::Target {
         &self.base
     }
@@ -130,6 +130,7 @@ pub struct App {
     pub username: String,
     pub host_name: String,
     pub os_str: String,
+    pub ebpf: library::EbpfTracker,
 }
 
 impl App {
@@ -182,6 +183,11 @@ impl App {
             username: library::lifecycle::foreground::identity::username(),
             host_name: library::lifecycle::foreground::identity::hostname(),
             os_str: library::lifecycle::foreground::identity::os_str(),
+            ebpf: {
+                let mut tracker = library::EbpfTracker::new();
+                let _ = tracker.start_tracking();
+                tracker
+            },
         };
         app.update_metrics();
         app

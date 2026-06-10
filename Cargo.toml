@@ -8,7 +8,7 @@ ratatui = { version = "0.30", default-features = false, features = ["termwiz"] }
 crossterm = "0.28"
 sysinfo = "0.30"
 serde_json = "1.0.150"
-library = { path = "../library", features = ["interface-tui", "lifecycle-foreground", "lifecycle-background", "platform-native", "role-application", "scenes", "chrome"] }
+library = { path = "../library", features = ["interface-app", "lifecycle-foreground", "lifecycle-background", "platform-native", "role-application", "scenes", "chrome"] }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.56.0"
@@ -19,7 +19,7 @@ embed-resource = "2"
 [package.metadata.deb]
 maintainer = "Jeryd <jerydleuck@gmail.com>"
 assets = [
-    ["target/x86_64-unknown-linux-musl/release/pulse", "usr/bin/pulse", "755"],
+    ["target/release/pulse", "usr/bin/pulse", "755"],
     ["assets/brand/app_icon.png", "usr/share/pixmaps/pulse.png", "644"],
     ["packaging/desktop/pulse.desktop", "usr/share/applications/pulse.desktop", "644"],
 ]

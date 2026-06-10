@@ -178,6 +178,15 @@ pub fn render_gpu_details(f: &mut Frame, area: Rect, app: &App, border_color: Co
 pub fn render_network_details(f: &mut Frame, area: Rect, app: &App, border_color: Color) {
     let green = Color::Rgb(80, 250, 123);
     let theme = &*app.theme;
+
+    let sub_chunks = ratatui::layout::Layout::default()
+        .direction(ratatui::layout::Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage(60),
+            Constraint::Percentage(40),
+        ])
+        .split(area);
+
     let header = Row::new(vec![
         "Interface",
         "Status",
@@ -243,9 +252,26 @@ pub fn render_network_details(f: &mut Frame, area: Rect, app: &App, border_color
     .block(
         Block::default()
             .borders(Borders::ALL)
-            .title(" Network ")
+            .title(" Network Interfaces ")
             .title_style(Style::default().fg(green).add_modifier(Modifier::BOLD))
             .border_style(Style::default().fg(border_color)),
     );
-    f.render_widget(table, area);
+    f.render_widget(table, sub_chunks[0]);
+
+    // Render eBPF tracked connections on the right panel
+    let connections = app.ebpf.get_active_connections();
+    let conn_text = if connections.is_empty() {
+        "No active connections tracked (or not supported on this OS).".to_string()
+    } else {
+        connections.join("\n")
+    };
+    let ebpf_block = Block::default()
+        .borders(Borders::ALL)
+        .title(" Active Connections (eBPF) ")
+        .title_style(Style::default().fg(green).add_modifier(Modifier::BOLD))
+        .border_style(Style::default().fg(border_color));
+    let ebpf_p = Paragraph::new(conn_text)
+        .block(ebpf_block)
+        .wrap(ratatui::widgets::Wrap { trim: true });
+    f.render_widget(ebpf_p, sub_chunks[1]);
 }

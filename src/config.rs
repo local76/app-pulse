@@ -9,7 +9,7 @@ use std::io;
 
 use library::platform::native::config::{AppConfig as GenericAppConfig, ConfigFields};
 
-pub const APP_NAME: &str = "pulse";
+pub const APP_NAME: &str = "app/pulse";
 pub const CONFIG_FILE: &str = "config.yaml";
 pub const CONFIG_HEADER: &str = "pulse Local Configuration\n-----------------------------";
 

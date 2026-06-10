@@ -30,7 +30,7 @@ const MIN_W: u16 = 100;
 const MIN_H: u16 = 35;
 
 fn run_tui() -> io::Result<()> {
-    file_log::set_log_app_name("pulse");
+    file_log::set_log_app_name("app/pulse");
     let _hwnd = hide_console_at_startup();
 
     let config = AppConfig::load();
@@ -94,7 +94,7 @@ fn run_tui() -> io::Result<()> {
 }
 
 fn main() -> io::Result<()> {
-    file_log::set_log_app_name("pulse");
+    file_log::set_log_app_name("app/pulse");
     let args: Vec<String> = std::env::args().collect();
     if args.len() > 1 {
         match args[1].as_str() {

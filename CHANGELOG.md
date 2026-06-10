@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 ### Renamed
 - **Project rename**: `pulse` was previously `pulse-tui` / `rMonitor`. The Cargo package name, binary name, file paths, registry keys, and docs are now lowercase `pulse`. Behavior and features are unchanged.
 
+### Refactored
+- **TUI Blueprint alignment**: Re-architected directory and module tree to standard TUI layout. Moved `src/app.rs` to `src/app/mod.rs` and `src/event_handler.rs` to `src/app/keys.rs`, and created `src/app/mouse.rs`. Created `src/backend/mod.rs` to dispatch system telemetry queries and moved `src/win32.rs` to `src/backend/win32.rs`. Modularized panels into `src/ui/` by renaming `src/panels/cards.rs` to `src/ui/cards.rs`, `src/panels/details.rs` to `src/ui/widgets.rs`, `src/panels/processes.rs` to `src/ui/processes.rs`, and `src/modals.rs` to `src/ui/overlays.rs`.
+
 ### Changed
 - README rewritten in the new register: live monitor feature list, install matrix, CLI flags, configuration, build instructions, license.
 - Drop the legacy "r*" and "Local freedom" branding throughout.

@@ -5,36 +5,26 @@ use std::{
     time::{Duration, Instant},
 };
 
-use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event},
-    execute,
-    terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
-};
-use ratatui::{Terminal, backend::CrosstermBackend};
+use crossterm::event::{self, Event};
 use library::lifecycle::background::file_log;
-use library::lifecycle::foreground::window::{
-    BorderlessConsole, ConsoleTitleGuard, SingleInstanceGuard, center_console_window,
-    hide_console_at_startup,
-};
+use library::lifecycle::foreground::window::hide_console_at_startup;
+use library::lifecycle::foreground::tui_bootstrap::{bootstrap_tui, shutdown_tui, TuiBootstrapConfig};
 
 mod app;
+mod backend;
 mod config;
 mod diagnostics;
 mod docs;
-mod event_handler;
 mod gpu_names;
 mod helpers;
 mod json;
 mod logger;
-mod modals;
 mod network_statuses;
-mod panels;
 mod spring;
-mod win32;
+mod ui;
 
 use crate::app::App;
 use crate::config::AppConfig;
-use crate::event_handler as eh;
 
 const MIN_W: u16 = 100;
 const MIN_H: u16 = 35;
@@ -42,50 +32,16 @@ const MIN_H: u16 = 35;
 fn run_tui() -> io::Result<()> {
     file_log::set_log_app_name("pulse");
     let _hwnd = hide_console_at_startup();
-    let _instance_guard = match SingleInstanceGuard::try_new() {
-        Ok(g) => g,
-        Err(e) => {
-            eprintln!("Error: {}", e);
-            std::process::exit(1);
-        }
-    };
-
-    let _title_guard = ConsoleTitleGuard::new("pulse");
-
-    enable_raw_mode()?;
-    let mut stdout = io::stdout();
-    let _ = execute!(stdout, crossterm::terminal::SetSize(MIN_W, MIN_H));
-    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
 
     let config = AppConfig::load();
-    let _borderless = if config.enable_borderless {
-        Some(BorderlessConsole::enable())
-    } else {
-        None
-    };
-    std::thread::sleep(Duration::from_millis(50));
-    if _borderless.is_none() {
-        center_console_window();
-    }
 
-    // Re-show console after TUI is up (parity with helm/ignite/scout).
-    #[cfg(windows)]
-    {
-        unsafe extern "system" {
-            fn ShowWindow(hWnd: *mut std::ffi::c_void, nCmdShow: i32) -> i32;
-            fn SetForegroundWindow(hWnd: *mut std::ffi::c_void) -> i32;
-        }
-        let h = hide_console_at_startup().unwrap_or(std::ptr::null_mut());
-        if !h.is_null() {
-            unsafe {
-                ShowWindow(h, 5);
-                SetForegroundWindow(h);
-            }
-        }
-    }
+    let mut tui_config = TuiBootstrapConfig::new("pulse");
+    tui_config.borderless = config.enable_borderless;
+    tui_config.size = (MIN_W, MIN_H);
 
-    let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
+    let (mut terminal, _guards) = bootstrap_tui(tui_config)?;
+
+        library::show_console_window();
 
     let mut app = App::new(config);
     let tick_rate = Duration::from_millis(app.config.refresh_rate_ms as u64);
@@ -93,6 +49,9 @@ fn run_tui() -> io::Result<()> {
     let mut last_refresh = Instant::now();
 
     while !app.should_quit {
+        if library::lifecycle::foreground::tui_bootstrap::is_app_shutting_down() {
+            break;
+        }
         app.status.tick();
         if let Some(state) = app.power.tick_power() {
             file_log::log_message("INFO", &format!("Power status changed: {}", state));
@@ -113,7 +72,7 @@ fn run_tui() -> io::Result<()> {
             last_refresh = Instant::now();
         }
 
-        terminal.draw(|f| eh::draw(f, &mut app))?;
+        terminal.draw(|f| ui::draw(f, &mut app))?;
 
         let current_tick = app.power.effective_tick_rate(tick_rate);
         let timeout = current_tick
@@ -122,20 +81,14 @@ fn run_tui() -> io::Result<()> {
 
         if event::poll(timeout)? {
             match event::read()? {
-                Event::Key(key) => eh::handle_key(&mut app, key),
-                Event::Mouse(mouse) => eh::handle_mouse(&mut app, mouse.kind, mouse.column, mouse.row),
+                Event::Key(key) => app::keys::handle_key(&mut app, key),
+                Event::Mouse(mouse) => app::mouse::handle_mouse(&mut app, mouse.kind, mouse.column, mouse.row),
                 _ => {}
             }
         }
     }
 
-    disable_raw_mode()?;
-    execute!(
-        terminal.backend_mut(),
-        LeaveAlternateScreen,
-        DisableMouseCapture
-    )?;
-    terminal.show_cursor()?;
+    shutdown_tui(&mut terminal)?;
     file_log::log_message("INFO", "pulse clean shutdown complete.");
     Ok(())
 }

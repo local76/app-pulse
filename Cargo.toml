@@ -14,7 +14,7 @@ library = { path = "../library", features = ["interface-tui", "lifecycle-foregro
 winreg = "0.56.0"
 
 [target.'cfg(windows)'.build-dependencies]
-winres = "0.1"
+embed-resource = "2"
 
 [package.metadata.deb]
 maintainer = "Jeryd <jerydleuck@gmail.com>"

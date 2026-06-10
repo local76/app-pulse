@@ -1,0 +1,15 @@
+//! Platform abstraction layer for pulse.
+//!
+//! **Taxonomy Classification**: Abstraction (Platform Abstraction Layer).
+
+#[cfg(windows)]
+pub mod win32;
+
+#[cfg(not(windows))]
+pub mod stub;
+
+#[cfg(windows)]
+pub use win32 as current;
+
+#[cfg(not(windows))]
+pub use stub as current;

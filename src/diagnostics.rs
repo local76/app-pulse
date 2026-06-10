@@ -89,6 +89,7 @@ pub fn run_doctor() {
 
     if let Ok(app_data) = std::env::var("APPDATA") {
         let log_file = std::path::Path::new(&app_data)
+            .join("local76")
             .join("pulse")
             .join("log.txt");
         println!("Log File Path:     {}", log_file.to_string_lossy());

@@ -15,6 +15,9 @@ use library::lifecycle::foreground::power_sync::PowerThrottle;
 use crate::config::AppConfig;
 use crate::spring::Spring;
 
+pub mod keys;
+pub mod mouse;
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum FocusedSection {
     Cpu,

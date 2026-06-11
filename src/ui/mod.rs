@@ -1,6 +1,6 @@
 ﻿//! pulse presentation layer (UI) root module.
 //!
-//! **Taxonomy Classification**: Interface (TUI / Presentation Layer).
+//! **Taxonomy Classification**: Interface (Presentation Layer).
 
 pub mod cards;
 pub mod widgets;

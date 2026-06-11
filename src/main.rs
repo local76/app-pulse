@@ -8,7 +8,7 @@ use std::{
 use crossterm::event::{self, Event};
 use library::apps::file_log;
 use library::apps::window::hide_console_at_startup;
-use library::apps::tui_bootstrap::{bootstrap_tui, shutdown_tui, TuiBootstrapConfig};
+use library::apps::bootstrap::{init, shutdown, Config as BootstrapConfig};
 
 mod app;
 mod backend;
@@ -33,11 +33,11 @@ fn run_ui() -> io::Result<()> {
 
     let config = AppConfig::load();
 
-    let mut tui_config = TuiBootstrapConfig::new("pulse");
+    let mut tui_config = BootstrapConfig::new("pulse");
     tui_config.borderless = config.enable_borderless;
     tui_config.size = (MIN_W, MIN_H);
 
-    let (mut terminal, _guards) = bootstrap_tui(tui_config)?;
+    let (mut terminal, _guards) = init(tui_config)?;
 
         library::apps::window::show_console_window();
 
@@ -47,7 +47,7 @@ fn run_ui() -> io::Result<()> {
     let mut last_refresh = Instant::now();
 
     while !app.should_quit {
-        if library::apps::tui_bootstrap::is_app_shutting_down() {
+        if library::apps::bootstrap::is_app_shutting_down() {
             break;
         }
         app.status.tick();
@@ -86,7 +86,7 @@ fn run_ui() -> io::Result<()> {
         }
     }
 
-    shutdown_tui(&mut terminal)?;
+    shutdown(&mut terminal)?;
     file_log::log_message("INFO", "pulse clean shutdown complete.");
     Ok(())
 }

@@ -1,6 +1,6 @@
-//! Damped Harmonic Oscillator (spring physics) for animated TUI elements.
+//! Damped Harmonic Oscillator (spring physics) for animated console elements.
 //!
-//! **Taxonomy Classification**: Interface (TUI / Presentation Layer).
+//! **Taxonomy Classification**: Interface (Presentation Layer).
 
 #[derive(Debug, Clone, Copy)]
 pub struct Spring {

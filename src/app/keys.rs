@@ -1,6 +1,6 @@
 ﻿//! Keyboard input event handler for pulse.
 //!
-//! **Taxonomy Classification**: Interface (TUI / Presentation Layer).
+//! **Taxonomy Classification**: Interface (Presentation Layer).
 
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 use library::ui::markdown::parse_markdown_to_lines;

@@ -20,7 +20,7 @@ pub mod monitors;
 pub mod shell_terminal;
 pub mod sys_info;
 pub mod window;
+pub mod registry;
 pub mod ebpf;
-
 
 pub mod sysinfo_shim;

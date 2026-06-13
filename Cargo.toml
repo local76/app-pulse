@@ -36,6 +36,7 @@ libc = "0.2"
 embed-resource = "2"
 
 [package.metadata.deb]
+name = "app-pulse"
 maintainer = "Jeryd <jerydleuck@gmail.com>"
 assets = [
     ["target/release/pulse", "usr/bin/pulse", "755"],
